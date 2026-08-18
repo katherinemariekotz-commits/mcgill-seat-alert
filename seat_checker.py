@@ -82,9 +82,11 @@ def get_course_status(page, course, crn):
     print(block)
     print("----------------------\\n")
 
-    if "all classes are full" in block.lower():
-        return "FULL", block
-
+if (
+    "all classes are full" in block.lower()
+    or "seats: full" in block.lower()
+):
+    return "FULL", block
     # VSB normally displays "All classes are full" when the locked
     # section cannot be enrolled in. If that warning disappears,
     # we treat it as a possible opening and alert immediately.
