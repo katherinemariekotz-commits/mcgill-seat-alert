@@ -20,7 +20,9 @@ jobs:
           python-version: "3.12"
 
       - name: Install packages
-        run: pip install -r requirements.txt
+        run: |
+          pip install -r requirements.txt
+          python -m playwright install --with-deps chromium
 
       - name: Check McGill seats
         env:
