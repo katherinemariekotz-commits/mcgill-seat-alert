@@ -22,7 +22,7 @@ jobs:
       - name: Install packages
         run: |
           pip install -r requirements.txt
-          python -m playwright install --with-deps chromium
+          python -m playwright install chromium
 
       - name: Check McGill seats
         env:
