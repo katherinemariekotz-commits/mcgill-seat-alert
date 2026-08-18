@@ -25,32 +25,34 @@ def get_remaining_seats(crn):
     response = requests.get(
         url,
         timeout=20,
-        headers={
-            "User-Agent": "Mozilla/5.0"
-        },
+        headers={"User-Agent": "Mozilla/5.0"},
     )
     response.raise_for_status()
 
     soup = BeautifulSoup(response.text, "html.parser")
-    text = soup.get_text(" ", strip=True)
 
-    # Look for the Registration Availability table.
-    match = re.search(
-        r"Seats\s+Capacity\s+Actual\s+Remaining\s+(\d+)\s+(\d+)\s+(\d+)",
-        text,
-        re.IGNORECASE,
+    # Look through all table rows for the row beginning with "Seats"
+    for row in soup.find_all("tr"):
+        cells = [
+            cell.get_text(" ", strip=True)
+            for cell in row.find_all(["td", "th"])
+        ]
+
+        if cells and cells[0].strip().lower() == "seats":
+            numbers = []
+
+            for cell in cells[1:]:
+                match = re.search(r"\d+", cell)
+                if match:
+                    numbers.append(int(match.group()))
+
+            if len(numbers) >= 3:
+                capacity, actual, remaining = numbers[:3]
+                return capacity, actual, remaining
+
+    raise RuntimeError(
+        f"Couldn't read seat availability for CRN {crn}."
     )
-
-    if not match:
-        raise RuntimeError(
-            f"Couldn't read seat availability for CRN {crn}."
-        )
-
-    capacity = int(match.group(1))
-    actual = int(match.group(2))
-    remaining = int(match.group(3))
-
-    return capacity, actual, remaining
 
 
 def send_email(open_courses):
